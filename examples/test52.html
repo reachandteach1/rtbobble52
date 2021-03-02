@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>RT Bobble Demonstration</h3>
+<button id="connect">Connect</button>
+<button id="disconnect">Disconnect</button>
+<p>
+<button id="motoron">ON</button>
+<button id="motoroff">OFF</button>
+<p>
+<button id="reverse">&larr;</button>
+&nbsp;
+<button id="forward">&rarr;</button>
+&nbsp;
+<button id="servo0">0</button>
+&nbsp;
+<button id="servo45">45</button>
+&nbsp;
+<button id="servo90">90</button>
+&nbsp;
+<button id="servo135">135</button>
+&nbsp;
+<button id="servo180">180</button>
+&nbsp;
+
+<form id="form1">
+
+        <input type="text" name="command" id="command" size=20 />&nbsp;
+        <input type="button" id="execute" value="Execute Command" />
+</form>
+
+<p id="demo"></p>
+
+<script>
+var bobble;
+var bobbleWrite;
+document.getElementById("connect").addEventListener("click", function(){
+  navigator.bluetooth.requestDevice({ filters: [{ services: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e'] }]  })
+  .then(device => {
+    bobble= device;
+    // Attempts to connect to remote GATT Server.
+    document.getElementById("demo").innerHTML = "Bobble connected";
+    return device.gatt.connect();
+  })
+  .then(server => {
+    // Getting primary UART service
+    return server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e');
+  })
+  .then(service => {
+    // Getting tx characteristic
+    return service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e');
+  })
+  .then(characteristic => {
+    // setup bobble write and turn motor off
+    bobbleWrite= characteristic;
+    let encoder = new TextEncoder();
+    return characteristic.writeValue(encoder.encode("-\n"));
+  })
+  .then(characteristic2 => {
+    // set servo to 0
+    let encoder = new TextEncoder();
+    return bobbleWrite.writeValue(encoder.encode("0\n"));
+  })
+
+
+  .catch(error => { alert(error); });
+
+});
+
+document.getElementById("disconnect").addEventListener("click", function(){
+  document.getElementById("demo").innerHTML = "Bobble disconnected";
+  bobble.gatt.disconnect();
+});
+
+document.getElementById("motoron").addEventListener("click", function(){
+    // Writing '+'
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("+\n"));
+    document.getElementById("demo").innerHTML = "Turn motor ON";
+});
+
+document.getElementById("motoroff").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("-\n"));
+    document.getElementById("demo").innerHTML = "Turn motor OFF";
+});
+
+document.getElementById("reverse").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("R\n"));
+    document.getElementById("demo").innerHTML = "Motor REVERSE";
+});
+
+document.getElementById("forward").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("F\n"));
+    document.getElementById("demo").innerHTML = "Motor FORWARD";
+});
+
+document.getElementById("servo0").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("0 s\n"));
+    document.getElementById("demo").innerHTML = "Servo= 0";
+});
+
+document.getElementById("servo45").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("45 s\n"));
+    document.getElementById("demo").innerHTML = "Servo= 45";
+});
+
+document.getElementById("servo90").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("90 s\n"));
+    document.getElementById("demo").innerHTML = "Servo= 90";
+});
+
+document.getElementById("servo135").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("135 s\n"));
+    document.getElementById("demo").innerHTML = "Servo= 135";
+});
+
+document.getElementById("servo180").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    bobbleWrite.writeValue(encoder.encode("180 s\n"));
+    document.getElementById("demo").innerHTML = "Servo= 180";
+});
+
+document.getElementById("execute").addEventListener("click", function(){
+    let encoder = new TextEncoder();
+    let inputCommand = document.getElementById("command").value;
+    bobbleWrite.writeValue(encoder.encode(inputCommand+"\n"));
+    document.getElementById("demo").innerHTML = "command="+"'"+inputCommand+"'";
+});
+</script>
+
+</body>
+</html>
