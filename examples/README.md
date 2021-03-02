@@ -9,3 +9,5 @@ pip3 install adafruit-io
 pip3 install selenium
 
 pip3 install --upgrade adafruit-blinka-bleio adafruit-circuitpython-ble
+
+Some examples also require chromedriver to be loaded into the Python path
